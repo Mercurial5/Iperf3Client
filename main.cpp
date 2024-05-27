@@ -8,7 +8,7 @@
 #include <thread>
 #include <vector>
 
-const int READ_CHUNK_SIZE = 1024;
+std::vector<unsigned char> COOKIE = { 'e', 'x', 'f', 'o', 'y', 'c', 'p', 't', 's', '4', 'l', '4', 'r', 't', '2', 'y', '6', '2', '2', 't', 'l', 'x', 'g', 'd', 'b', 'x', '7', 'k', 'm', 'o', 'u', 'j', '2', 'e', 'l', '2', 0};
 
 addrinfo* get_addrinfo(const std::string host, const std::string port) {
     struct addrinfo hints;
@@ -92,7 +92,6 @@ int main(int argc, char** argv) {
     std::string port = "5201";
     
     int sfd = connect(host, port);
-    std::vector<unsigned char> COOKIE = { 'e', 'x', 'f', 'o', 'y', 'c', 'p', 't', 's', '4', 'l', '4', 'r', 't', '2', 'y', '6', '2', '2', 't', 'l', 'x', 'g', 'd', 'b', 'x', '7', 'k', 'm', 'o', 'u', 'j', '2', 'e', 'l', '2', 0};
     std::string message = std::string(begin(COOKIE), end(COOKIE));
     send(sfd, message);
 
@@ -116,11 +115,25 @@ int main(int argc, char** argv) {
         send(sfd2, message);
     }
     
-    if (argc == 2) {
-        int x = 4;
-        write(sfd, (char *) &x, sizeof(signed char));
-    } else {
-        int x = 16;
-        write(sfd, (char *) &x, sizeof(signed char));
+    int x = 4;
+    write(sfd, (char *) &x, sizeof(signed char));
+
+    close(sfd2);
+
+    x = 16;
+    write(sfd, (char *) &x, sizeof(signed char));
+
+    
+    std::string response;
+    while (true) {
+        std::string chunk;
+        chunk.resize(1024);
+        int r = read(sfd, &chunk[0], 1024);
+        response += chunk;
+        if (r == 0) {
+            break;
+        }
     }
+
+    std::cout << "response: " << response << std::endl;
 }
